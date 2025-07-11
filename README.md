@@ -2,7 +2,7 @@
 
 ![Logo](images/missingsemesterlogo.PNG)
 
-Dump of notebooks and environment files for [The Missing Semester](https://themissingsemester.substack.com/p/bioinformatics-the-missing-semester) Substack series.
+Dump of data, notebooks and environment files for [The Missing Semester](https://themissingsemester.substack.com/p/bioinformatics-the-missing-semester) Substack series.
 
 # Scope
 
