@@ -1,6 +1,6 @@
 # Bioinformatics: The Missing Semester
 
-![Logo](/Users/aneesavalentine/themissingsemester/images/themissingsemester.png)
+![Logo](themissingsemester/images/themissingsemester.png)
 
 Dump of notebooks and environment files for [The Missing Semester](https://themissingsemester.substack.com/p/bioinformatics-the-missing-semester) Substack series.
 
