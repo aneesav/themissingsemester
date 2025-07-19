@@ -7,7 +7,7 @@ Dump of data, notebooks and environment files for [The Missing Semester](https:/
 # Scope
 
 Module 1: Data types
-- Lesson 1: RNA transcriptomics
+- Lesson 1: scRNA transcriptomics
 - Lesson 2: Spatial transcriptomics
 - Lesson 3: Proteomics
 
