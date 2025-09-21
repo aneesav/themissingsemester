@@ -205,7 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+<<<<<<< HEAD
 
 # Large files
 *.tar
 *.h5ad
+=======
+>>>>>>> 4ed9afd5ce825556ed0ee517a25db19b809d70f8
