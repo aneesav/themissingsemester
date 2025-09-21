@@ -208,3 +208,4 @@ __marimo__/
 
 # Large files
 *.tar
+*.h5ad
