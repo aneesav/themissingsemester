@@ -18,7 +18,7 @@ Module 3: Reproducibility & Scale
 - Lesson 3: Nextflow workflows
 
 Module 4: AI
-- Language models in multi-omics
+- Foundation models in multi-omics
 
 
 # Contributing and Setup
