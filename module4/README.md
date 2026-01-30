@@ -8,7 +8,7 @@ Module 4 requires a **separate virtual environment** from modules 1-3. The two `
 
 ### The root cause: NumPy 1.x vs 2.x
 
-The parent project (modules 1-3) uses **NumPy 2.2.6**. Module 4 pins **NumPy 1.26.4** because several of its key dependencies — notably `numba`, `cellxgene-census`, and `tiledbsoma` — do not yet support NumPy 2.x. Since NumPy's major version change introduced breaking C API changes, packages compiled against NumPy 1.x will not work with NumPy 2.x installed.
+The parent project (modules 1-3) uses **NumPy 2.2.6**. Module 4 pins **NumPy 1.26.4** because several of its key dependencies (notably `numba`, `cellxgene-census` and `tiledbsoma`) do not yet support NumPy 2.x. Since NumPy's major version change introduced breaking C API changes, packages compiled against NumPy 1.x will not work with NumPy 2.x installed.
 
 This NumPy constraint cascades into version differences across the rest of the scientific stack.
 
@@ -57,11 +57,11 @@ pip install -e .
 
 Do **not** install the parent `pyproject.toml` into this environment, or vice versa. The NumPy version conflict will cause import errors or segfaults in compiled extensions.
 
-## Data and model files
+## (Note: Data and model files)
 
 The following large files are required but **not tracked in git**:
 
 - `data/Immune_ALL_human.h5ad` (~2 GB) — Human immune cell atlas in H5AD format
 - `scGPT_heart/best_model.pt` (~205 MB) — Pre-trained scGPT model weights
 
-The smaller model metadata files (`scGPT_heart/args.json`, `scGPT_heart/vocab.json`) are also not tracked. Refer to the notebook for download instructions.
+The smaller model metadata files (`scGPT_heart/args.json`, `scGPT_heart/vocab.json`) are also not tracked. Refer to the Substack tutorial for download links.
