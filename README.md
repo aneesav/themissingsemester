@@ -14,8 +14,7 @@ Module 2: Multi-omics
 
 Module 3: Reproducibility & Scale
 - Lesson 1: Docker containerization
-- Lesson 2: Parallel computing
-- Lesson 3: Nextflow workflows
+- Lesson 2: Nextflow workflows
 
 Module 4: AI
 - Foundation models in multi-omics
