@@ -76,30 +76,25 @@ jobs:
       - name: Register new ECS task definition revision
         id: task-def
         run: |
-          # Fetch current task definition, swap in the new image SHA tag, re-register
-          CURRENT=$(aws ecs describe-task-definition \
-            --task-definition $ECS_TASK_DEFINITION \
-            --query 'taskDefinition' --output json)
-
           NEW_IMAGE="${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ github.sha }}"
-
-          NEW_DEF=$(echo "$CURRENT" | python3 - "$NEW_IMAGE" << 'PYEOF'
-          import sys, json
+          # Fetch current task definition to a file (avoids heredoc + pipe conflict)
+          aws ecs describe-task-definition \
+            --task-definition $ECS_TASK_DEFINITION \
+            --query 'taskDefinition' --output json > /tmp/task-def-current.json
+          # Swap image and strip read-only fields, write new def to file
+          python3 -c "
+          import json, sys
           new_image = sys.argv[1]
-          td = json.load(sys.stdin)
-          # Strip read-only fields ECS won't accept on register
+          td = json.load(open('/tmp/task-def-current.json'))
           for key in ['taskDefinitionArn','revision','status','requiresAttributes',
                       'compatibilities','registeredAt','registeredBy']:
               td.pop(key, None)
           td['containerDefinitions'][0]['image'] = new_image
-          print(json.dumps(td))
-          PYEOF
-          )
-
-          NEW_ARN=$(echo "$NEW_DEF" | aws ecs register-task-definition \
-            --cli-input-json /dev/stdin \
+          json.dump(td, open('/tmp/task-def-new.json', 'w'))
+          " "$NEW_IMAGE"
+          NEW_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file:///tmp/task-def-new.json \
             --query 'taskDefinition.taskDefinitionArn' --output text)
-
           echo "task_def_arn=$NEW_ARN" >> $GITHUB_OUTPUT
           echo "Registered: $NEW_ARN"
 
