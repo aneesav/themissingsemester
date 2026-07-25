@@ -3,20 +3,31 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: The Missing Semester Platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: users
+    description: User management
+  - name: lessons
+    description: Curriculum lessons
+  - name: progress
+    description: Learner progress tracking
+  - name: sessions
+    description: Notebook container sessions
+  - name: api-keys
+    description: Learner API key management
+  - name: admin
+    description: Admin-only operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +35,401 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /users/me:
+    get:
+      operationId: getCurrentUser
+      tags: [users]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users/sync:
+    post:
+      operationId: syncUser
+      tags: [users]
+      summary: Sync user from Clerk (called after login)
+      responses:
+        "200":
+          description: User synced
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /lessons:
+    get:
+      operationId: listLessons
+      tags: [lessons]
+      summary: List all lessons grouped by module
+      responses:
+        "200":
+          description: All modules and lessons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Module"
+
+  /lessons/{lessonId}:
+    get:
+      operationId: getLesson
+      tags: [lessons]
+      summary: Get a single lesson by ID
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lesson detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /progress:
+    get:
+      operationId: listProgress
+      tags: [progress]
+      summary: Get all progress for the current user
+      responses:
+        "200":
+          description: User progress across all lessons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Progress"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /progress/{lessonId}:
+    get:
+      operationId: getLessonProgress
+      tags: [progress]
+      summary: Get progress for a specific lesson
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Progress for this lesson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Progress"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateProgress
+      tags: [progress]
+      summary: Update progress for a lesson
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProgressUpdate"
+      responses:
+        "200":
+          description: Updated progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Progress"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /sessions:
+    post:
+      operationId: createSession
+      tags: [sessions]
+      summary: Start or resume a notebook container session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionInput"
+      responses:
+        "201":
+          description: Session created or resumed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /sessions/active:
+    get:
+      operationId: getActiveSession
+      tags: [sessions]
+      summary: Get the current user's active session if any
+      responses:
+        "200":
+          description: Active session or null
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionOrNull"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /sessions/{sessionId}:
+    get:
+      operationId: getSession
+      tags: [sessions]
+      summary: Get session status by ID
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Session detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: stopSession
+      tags: [sessions]
+      summary: Stop a container session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Session stopped
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api-keys:
+    get:
+      operationId: listApiKeys
+      tags: [api-keys]
+      summary: List user's configured API keys (masked values)
+      responses:
+        "200":
+          description: List of configured API keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiKey"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api-keys/{service}:
+    put:
+      operationId: upsertApiKey
+      tags: [api-keys]
+      summary: Create or update an API key for a service
+      parameters:
+        - name: service
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiKeyInput"
+      responses:
+        "200":
+          description: API key saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKey"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteApiKey
+      tags: [api-keys]
+      summary: Remove an API key
+      parameters:
+        - name: service
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Platform overview stats
+      responses:
+        "200":
+          description: Admin stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/users:
+    get:
+      operationId: listAdminUsers
+      tags: [admin]
+      summary: List all users with progress summary
+      responses:
+        "200":
+          description: All users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminUser"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/lessons/funnel:
+    get:
+      operationId: getLessonFunnel
+      tags: [admin]
+      summary: Lesson funnel - started vs completed per lesson
+      responses:
+        "200":
+          description: Funnel data per lesson
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LessonFunnelItem"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/sessions:
+    get:
+      operationId: listAdminSessions
+      tags: [admin]
+      summary: Recent session log across all users
+      responses:
+        "200":
+          description: Recent sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminSession"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +440,335 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        clerkId:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [learner, admin]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - clerkId
+        - email
+        - name
+        - role
+        - createdAt
+
+    Module:
+      type: object
+      properties:
+        moduleNum:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        lessons:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lesson"
+      required:
+        - moduleNum
+        - title
+        - description
+        - lessons
+
+    Lesson:
+      type: object
+      properties:
+        id:
+          type: integer
+        moduleNum:
+          type: integer
+        lessonNum:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        requiresApiKeys:
+          type: boolean
+      required:
+        - id
+        - moduleNum
+        - lessonNum
+        - title
+        - description
+        - requiresApiKeys
+
+    LessonDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        moduleNum:
+          type: integer
+        lessonNum:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        objectives:
+          type: array
+          items:
+            type: string
+        notebookPath:
+          type: string
+        requiresApiKeys:
+          type: boolean
+        requiredServices:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - moduleNum
+        - lessonNum
+        - title
+        - description
+        - objectives
+        - notebookPath
+        - requiresApiKeys
+        - requiredServices
+
+    Progress:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        lessonId:
+          type: integer
+        cellsRun:
+          type: integer
+        totalCells:
+          type: integer
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
+        lastActiveAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - lessonId
+        - cellsRun
+        - totalCells
+        - lastActiveAt
+
+    ProgressUpdate:
+      type: object
+      properties:
+        cellsRun:
+          type: integer
+        totalCells:
+          type: integer
+        completed:
+          type: boolean
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        lessonId:
+          type: integer
+        status:
+          type: string
+          enum: [starting, running, paused, stopped, error]
+        containerUrl:
+          type: ["string", "null"]
+        ecsTaskArn:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: ["string", "null"]
+          format: date-time
+      required:
+        - id
+        - userId
+        - lessonId
+        - status
+        - createdAt
+
+    SessionOrNull:
+      type: object
+      properties:
+        session:
+          oneOf:
+            - $ref: "#/components/schemas/Session"
+            - type: "null"
+      required:
+        - session
+
+    SessionInput:
+      type: object
+      properties:
+        lessonId:
+          type: integer
+      required:
+        - lessonId
+
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        service:
+          type: string
+        maskedKey:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - service
+        - maskedKey
+        - createdAt
+
+    ApiKeyInput:
+      type: object
+      properties:
+        key:
+          type: string
+          minLength: 1
+      required:
+        - key
+
+    AdminStats:
+      type: object
+      properties:
+        totalLearners:
+          type: integer
+        sessionsToday:
+          type: integer
+        sessionsThisWeek:
+          type: integer
+        lessonsCompleted:
+          type: integer
+        activeSessions:
+          type: integer
+      required:
+        - totalLearners
+        - sessionsToday
+        - sessionsThisWeek
+        - lessonsCompleted
+        - activeSessions
+
+    AdminUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        lastActiveAt:
+          type: ["string", "null"]
+          format: date-time
+        lessonsCompleted:
+          type: integer
+        lessonsStarted:
+          type: integer
+      required:
+        - id
+        - email
+        - name
+        - role
+        - createdAt
+        - lessonsCompleted
+        - lessonsStarted
+
+    LessonFunnelItem:
+      type: object
+      properties:
+        lessonId:
+          type: integer
+        lessonTitle:
+          type: string
+        moduleNum:
+          type: integer
+        lessonNum:
+          type: integer
+        started:
+          type: integer
+        completed:
+          type: integer
+      required:
+        - lessonId
+        - lessonTitle
+        - moduleNum
+        - lessonNum
+        - started
+        - completed
+
+    AdminSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        userEmail:
+          type: string
+        userName:
+          type: string
+        lessonId:
+          type: integer
+        lessonTitle:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: ["string", "null"]
+          format: date-time
+        durationMinutes:
+          type: ["integer", "null"]
+      required:
+        - id
+        - userId
+        - userEmail
+        - userName
+        - lessonId
+        - lessonTitle
+        - status
+        - createdAt

@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "The Missing Semester"
+version = "1.0.0"
+id = "artifacts/missing-semester"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25045
+
+[services.development]
+run = "pnpm --filter @workspace/missing-semester run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/missing-semester", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/missing-semester/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25045"
+BASE_PATH = "/"
