@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 ARG BUILD_DATE
 ARG GIT_SHA
@@ -29,28 +29,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # ── Core scientific stack ────────────────────────────────────────────────────
-COPY requirements-core.txt /tmp/requirements-core.txt
+COPY requirements-core.txt /tmp/
 RUN pip install --no-cache-dir --prefer-binary -r /tmp/requirements-core.txt
 
 # ── Bioinformatics ───────────────────────────────────────────────────────────
-COPY requirements-bio.txt /tmp/requirements-bio.txt
+COPY requirements-bio.txt /tmp/
 RUN pip install --no-cache-dir --prefer-binary -r /tmp/requirements-bio.txt
 
 # ── Spatial / geospatial ─────────────────────────────────────────────────────
-COPY requirements-spatial.txt /tmp/requirements-spatial.txt
+COPY requirements-spatial.txt /tmp/
 RUN pip install --no-cache-dir --prefer-binary -r /tmp/requirements-spatial.txt
 
 # ── AI / LLM (Module 4) ──────────────────────────────────────────────────────
-COPY requirements-ai.txt /tmp/requirements-ai.txt
+COPY requirements-ai.txt /tmp/
 RUN pip install --no-cache-dir --prefer-binary -r /tmp/requirements-ai.txt
 
 # ── Jupyter ───────────────────────────────────────────────────────────────────
 RUN pip install --no-cache-dir --prefer-binary \
-    "jupyterlab>=4.0.0" \
+    "jupyterlab>=4.0" \
     "ipywidgets>=8.0" \
-    "ipyleaflet>=0.17.0" \
-    nbformat \
-    nbconvert
+    "ipyleaflet>=0.17" \
+    nbformat nbconvert
 
 # Pull notebooks from the curriculum repo
 RUN git clone --depth=1 --branch=main \
@@ -59,7 +58,6 @@ RUN git clone --depth=1 --branch=main \
     cp -r /tmp/curriculum/* /opt/notebooks/ && \
     rm -rf /tmp/curriculum
 
-# Non-root user
 RUN useradd -m -s /bin/bash learner
 WORKDIR /home/learner
 

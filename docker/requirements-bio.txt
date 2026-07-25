@@ -1,27 +1,28 @@
-# Bioinformatics — Module 1
-anndata>=0.10
-scanpy>=1.9
-igraph>=0.10
+# zarr v3 + dask required by the whole stack
+zarr>=3.1
+dask[array]>=2026.3.0
+xarray>=2024.10.0
+
+# scRNA — Module 1 Lesson 1
+anndata>=0.11
+scanpy>=1.10
+igraph>=0.11
 leidenalg>=0.10
 pynndescent>=0.5
 umap-learn>=0.5
-numba>=0.57
-h5py>=3.8
-pyarrow>=12.0
-fsspec>=2023.1
-s3fs>=2023.1
+numba>=0.59
+
+# Storage / I/O
+fsspec>=2024.1
+s3fs>=2024.1
 pooch>=1.7
-imageio>=2.28
+
+# Visualization
 pillow>=10.0
-scikit-image>=0.21
-tifffile>=2023.1
+scikit-image>=0.22
+imageio>=2.33
+tifffile>=2024.1
 
 # Multi-omics — Module 2
-mudata>=0.2
-muon>=0.1.5
-
-# Parallel computing
-dask>=2023.1
-
-# Proteomics helper
-scikit-misc>=0.3
+mudata>=0.3
+muon>=0.1.7

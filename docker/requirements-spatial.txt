@@ -1,16 +1,19 @@
 # Spatial transcriptomics — Module 1 Lesson 2
-spatialdata>=0.1
-squidpy>=1.3
+# Note: spatialdata pulls in ome-zarr, xarray, dask-image transitively
+spatialdata>=0.4
+squidpy>=1.5
 spatial-image>=0.3
 multiscale-spatial-image>=0.10
-xarray>=2023.1
-zarr>=2.14
-ome-zarr>=0.8
-geopandas>=0.13
+ome-zarr>=0.16
+
+# Geospatial (required by spatialdata/geopandas)
+geopandas>=0.14
 shapely>=2.0
 pyproj>=3.5
-pyogrio>=0.6
-datashader>=0.15
+pyogrio>=0.7
+
+# Visualization helpers
+datashader>=0.16
 colorcet>=3.0
 matplotlib-scalebar>=0.8
-dask-image>=2021.12
+dask-image>=0.6

@@ -1,11 +1,19 @@
-# AI / LLM — Module 4 (keys supplied by learner at session start)
+# AI / LLM — Module 4 (API keys supplied by learner at session start)
 openai>=1.0
 langchain>=0.1
 langchain-community>=0.0.20
 langchain-core>=0.1
 tiktoken>=0.5
+
+# Pinecone vector DB
 pinecone-client>=3.0
+
+# CellxGene Census (large-scale cell atlas)
 cellxgene-census>=1.10
 tiledbsoma>=1.10
+
+# Multi-omics signalling
 omnipath>=1.0
+
+# Session metadata
 session-info2>=0.1
