@@ -1,6 +1,6 @@
-# Bioinformatics: The Missing Semester — Development Platform Spec
+# Bioinformatics: The Missing Semester — Platform Spec
 
-> **Status:** Draft for review  
+> **Status:** Finalized — ready to build  
 > **Source curriculum:** [github.com/aneesav/themissingsemester](https://github.com/aneesav/themissingsemester)
 
 ---
@@ -13,7 +13,7 @@ Running the Missing Semester notebooks today requires a bioinformatics expert:
 - Diagnose build failures (`igraph`, `leidenalg`, `numba` are notoriously fiddly)
 - Find and place data files in the right paths before any notebook runs
 
-A student with no coding background has no chance of getting through setup before giving up. The goal of this platform is to make that entire setup invisible — the learner lands on a page, clicks a lesson, and is coding in under 30 seconds.
+The target audience — students with no programming exposure and wet lab / bench scientists exploring computational analysis for the first time — has no path through that setup. This platform removes it entirely: learners log in, pick a lesson, and are running real Python in under 30 seconds, with no installation, no configuration, and no prior coding knowledge required.
 
 ---
 
@@ -34,196 +34,232 @@ Module 3 — Reproducibility & Scale
 
 Module 4 — AI in Multi-omics
   Lesson 1  Foundation Models             (module4/…)
+  ⚠️  Requires learner-supplied API keys: OpenAI, Pinecone (setup guide shown in-app)
 ```
 
-Each lesson is a Jupyter notebook with narrative cells (Markdown) and code cells (Python), plus bundled sample datasets.
+Each lesson is a Jupyter notebook with narrative Markdown cells and executable Python cells, plus bundled sample datasets.
 
 ---
 
-## 3. Proposed Platform
+## 3. Architecture
 
-### 3.1 High-level Architecture
+### 3.1 Overview
 
 ```
 Browser (React web app)
     │
     ▼
-Platform API (Express / Node)    ←── Auth (Clerk or Replit Auth)
+Platform API (Express / Node)    ←── Auth: Google OAuth via Clerk
     │
-    ├── Session Manager           ←── starts/stops per-user notebook servers
+    ├── Session Manager           ←── starts/stops per-user notebook containers
     │       │
     │       ▼
-    │   Notebook Runner           ←── JupyterLab or nbconvert
-    │       │                        running inside a pre-built container
+    │   AWS ECS / Fargate         ←── per-user ephemeral task
+    │       │
     │       ▼
-    │   Pre-installed Python env  ←── all 80+ dependencies already on disk
-    │       + sample data files        so no pip install ever runs at runtime
+    │   Pre-built Docker image    ←── all 80+ Python deps baked in at image-build time
+    │       + sample data fetch         no pip install at runtime
     │
-    └── Progress Store (Postgres) ←── which cells the user has run, notes, etc.
+    └── Postgres (Drizzle ORM)    ←── users, progress, session metadata
 ```
 
-### 3.2 The Key Design Decision: Where Does Python Run?
+### 3.2 Container Strategy
 
-This is the most important architectural choice in the project. Three options:
+Every learner gets their own ephemeral AWS Fargate task running the pre-built Docker image. The key invariant: **all dependencies are installed at image build time** — the container starts with a fully working environment already in place.
 
-| Option | How it works | Pros | Cons |
-|---|---|---|---|
-| **A — Cloud containers (Docker)** | Every user gets their own short-lived Docker container with all deps pre-installed. The web app proxies Jupyter into an iframe. | Full Python environment, identical to the real thing | Requires a cloud host that supports containers (e.g. Fly.io, Railway, GCP Run). Cold-start ~10–20s. Cost scales with users. |
-| **B — Shared long-running server** | One (or a few) JupyterHub servers pre-installed with all deps, multi-user with Jupyter's native token auth. | Simpler ops, faster launch | Users share resources; code isolation is weak |
-| **C — Static notebook viewer + Binder** | Web app displays read-only lesson content; a "Run in Binder" button opens mybinder.org with the repo | Zero backend cost | mybinder.org can take 1–3 min to build; no user progress tracking; no custom UX |
-
-**Recommendation: Option A** is the right long-term product. Option C is a valid MVP to validate the curriculum layout before investing in containers.
-
----
-
-## 4. User Experience (Option A — full platform)
-
-### 4.1 Course Dashboard
-
-The landing screen after login. Shows:
-
-- Module cards with progress indicators (e.g. "Lesson 2 of 3 complete")
-- A "Continue" button that drops the user back into their last active session
-- A "Start fresh" button that resets progress for a lesson
-- Brief one-liner descriptions of what each lesson covers
-
-### 4.2 Lesson Entry Flow
-
-1. User clicks a lesson card
-2. Platform checks whether a container session exists for this user + lesson
-   - If not: start one (show a progress bar during the ~15s cold start)
-   - If yes: resume immediately
-3. JupyterLab opens embedded in an iframe or in a new tab, pointing at the user's container
-
-### 4.3 Inside the Notebook
-
-The notebook is stock JupyterLab — no changes to the notebook UX. However the platform wraps it with:
-
-- A **top bar** showing: lesson title, progress breadcrumb, and a "Back to dashboard" link
-- A **help sidebar** (collapsible) with:
-  - Concept glossary for the current lesson
-  - Links to the Substack post accompanying the lesson
-  - "Something broken?" feedback form
-
-### 4.4 Progress Tracking
-
-When a user runs a cell, the platform records a checkpoint. This powers:
-
-- "X of Y cells run" progress bars on the dashboard
-- Resume-exactly-where-you-left-off on re-entry
-- Instructor view: see aggregate completion stats across all learners
-
-### 4.5 Session Lifecycle
+**Session lifecycle:**
 
 | Event | Action |
 |---|---|
-| User opens lesson | Container starts (or resumes) |
-| No activity for 30 min | Container paused (state preserved) |
-| No activity for 24 hrs | Container stopped; state saved to object storage |
-| User returns | Container restarts, state restored |
+| Learner opens a lesson | ECS task starts (or wakes from paused) — ~10–20s cold start |
+| JupyterLab ready | Platform API returns the container URL; frontend embeds it |
+| No activity for 30 min | Task paused; kernel state saved to S3 |
+| No activity for 24 hrs | Task stopped; notebook file saved to S3 |
+| Learner returns | Task restarts; state restored from S3 |
 
----
+### 3.3 Pre-built Docker Image
 
-## 5. Technical Stack
-
-| Layer | Technology | Rationale |
-|---|---|---|
-| Frontend | React + Vite | Fast, component-based, easy to style |
-| Platform API | Express (Node) | Already in the monorepo |
-| Auth | Clerk | Zero-config, handles email + Google login |
-| Session management | Custom Express service | Talks to container runtime |
-| Container runtime | Docker / Fly.io Machines | Per-user ephemeral containers |
-| Pre-built image | Custom Dockerfile | All 80+ pip deps + Jupyter installed at build time |
-| Data files | Object storage | Sample datasets served to containers on demand |
-| Progress DB | Postgres (Drizzle) | Already in the monorepo |
-| Notebook serving | JupyterLab (inside container) | Industry standard |
-
----
-
-## 6. Pre-built Docker Image
-
-The container image is the most critical infrastructure piece. Built once, used for every session.
-
-**What goes in it:**
+Built once, pushed to Amazon ECR, used for every session.
 
 ```dockerfile
 FROM python:3.11-slim
-# System deps: build-essential for igraph/leidenalg, libproj for pyproj, etc.
-RUN apt-get install -y build-essential libproj-dev libgeos-dev ...
 
-# Install all Python deps from requirements.txt
+# System-level build dependencies (required for igraph, leidenalg, pyproj, etc.)
+RUN apt-get update && apt-get install -y \
+    build-essential python3-dev libproj-dev libgeos-dev \
+    libhdf5-dev libssl-dev libffi-dev git curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install all Python dependencies (the heavy step — runs once at image build)
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Jupyter
-RUN pip install jupyterlab ipywidgets ipyleaflet
+# Install Jupyter stack
+RUN pip install --no-cache-dir \
+    jupyterlab>=4.0 ipywidgets ipyleaflet
 
-# Copy curriculum notebooks (read-only reference copy)
+# Copy notebooks (read-only reference; each user gets a writable copy in their home dir)
 COPY notebooks/ /opt/notebooks/
 
-# Entrypoint: start JupyterLab on a configurable port
-CMD ["jupyter", "lab", "--ip=0.0.0.0", "--no-browser", "--NotebookApp.token=''"]
+# Bootstrap script: copies notebooks to user workspace, fetches data files from S3
+COPY bootstrap.sh /opt/bootstrap.sh
+RUN chmod +x /opt/bootstrap.sh
+
+EXPOSE 8888
+CMD ["/opt/bootstrap.sh"]
 ```
 
-Image build time: ~10–20 min (done once, cached). Container start time: ~5–15s.
+**bootstrap.sh** (runs at container start):
+1. Copies the relevant lesson notebooks to `/home/user/workspace/`
+2. Downloads required sample datasets from S3 into `/home/user/workspace/data/`
+3. Signals the Platform API: `"ready"` (API then shows the learner the notebook)
+4. Starts JupyterLab on port 8888 with a platform-provided single-use token
 
 ---
 
-## 7. Data Files
+## 4. Data & Storage
 
-Several lessons require sample datasets (scRNA `.h5ad` files, spatial images, proteomics CSVs). These are large (hundreds of MB to GB range).
+### Sample Datasets
 
-**Plan:**
+The notebooks reference datasets that are too large to bundle in the Docker image:
 
-- Host datasets in object storage (S3-compatible)
-- Each container auto-downloads the datasets for its lesson on first launch using a bootstrap script
-- After download, the bootstrap signals "ready" to the platform API, which then shows the user the notebook
+- `module1/data/` — scRNA `.h5ad` files, spatial images, proteomics CSVs (estimate: 200MB–2GB total)
+- Stored in **Amazon S3**, fetched by `bootstrap.sh` at container start for the specific lesson
 
----
+### User Data
 
-## 8. Open Questions for Review
+Stored in **Postgres**:
 
-Before building, I'd like your input on a few decisions:
+```
+users          id, email, name, google_sub, role (learner | admin), created_at
+lessons        id, module_num, lesson_num, title, notebook_path, description
+progress       user_id, lesson_id, cells_run, total_cells, last_active, completed_at
+sessions       id, user_id, lesson_id, ecs_task_arn, status, container_url, created_at, ended_at
+api_keys       user_id, service (openai | pinecone | …), encrypted_key_ref, created_at
+```
 
-1. **Target audience scope** — Is this primarily for absolute beginners (no Python), or also for bioinformatics researchers who just want the environment pre-configured?
-
-2. **Deployment target** — Where do you want the containers to run? Options: Fly.io (simple, usage-based pricing), AWS/GCP (more control, more ops), or Replit Deployments (simplest, but container-per-user isn't directly supported — would need an external host for the Python layer).
-
-3. **MVP vs. full build** — Should I start with a static curriculum browser that uses Binder for execution (fast, no infrastructure), and then layer in the real container backend? Or build container infrastructure from the start?
-
-4. **Progress tracking** — Do you need instructor/admin views (to see how many learners completed each lesson), or is this just a personal learning tool for now?
-
-5. **Authentication** — Should learners be required to create an account, or can they try lessons anonymously with progress saved locally?
-
-6. **Module 4 (AI)** — The requirements include OpenAI, Pinecone, and LangChain. Will learners need to supply their own API keys, or do you plan to proxy a shared API key?
+User-saved notebook state (the actual `.ipynb` files with cell outputs) → **S3**, keyed by `user_id/lesson_id/notebook.ipynb`.
 
 ---
 
-## 9. Phased Build Plan
+## 5. Application Pages & UX
 
-### Phase 1 — Curriculum Browser (1–2 days)
-- React web app with the curriculum map (modules, lessons, descriptions)
-- Each lesson links to a Binder-hosted notebook (no custom infrastructure)
-- Auth + progress tracking stubbed out
+### 5.1 Auth — Google Login
 
-### Phase 2 — Container Sandbox (1 week)
-- Pre-built Docker image with all dependencies
-- Platform API: session create/resume/stop
-- Frontend: lesson entry flow with loading state, embedded JupyterLab
-- Basic progress tracking (which lesson was last opened)
+- Login page: Google OAuth button (via Clerk)
+- On first login: brief welcome screen ("Welcome to The Missing Semester — here's what you'll learn")
+- No manual signup form; Google is the only auth method
 
-### Phase 3 — Full Learning Experience (1–2 weeks)
-- Cell-level progress tracking
+### 5.2 Course Dashboard (learner home)
+
+After login, learners land here. Shows:
+
+- Module cards in order (Module 1 → 4)
+- Each module card: title, 1-line description, per-lesson progress pills
+- "Continue" button for the last active lesson
+- Lock icon on Module 4 lessons with a tooltip: "You'll need API keys for this lesson — set them up in Settings"
+
+### 5.3 Lesson Entry
+
+1. Learner clicks a lesson → lesson detail page (title, what you'll learn, prerequisites)
+2. "Launch Notebook" button → platform starts the container
+3. Loading state: animated progress bar with friendly copy ("Setting up your environment — this takes about 15 seconds")
+4. Once `bootstrap.sh` signals ready → JupyterLab embedded in the page (or opens in a new tab — user preference)
+5. Top bar above the iframe: lesson title, module breadcrumb, "Back to Dashboard" link, "Save & Exit" button
+
+### 5.4 Settings Page (learner)
+
+- Google account info (display only)
+- **API Keys section**: one row per required service (OpenAI, Pinecone, etc.)
+  - Each row: service name, a `?` link to a "How to get this key" guide (inline expandable), masked input field, Save/Remove buttons
+  - Keys are stored encrypted and injected as environment variables into the learner's container at session start
+
+### 5.5 Admin Dashboard
+
+Accessible only to accounts with `role = admin`. Shows:
+
+- **Overview:** total learners, sessions started today/this week, lessons completed
+- **Learner table:** searchable/filterable list of all users — name, email, last active, lessons completed
+- **Lesson funnel:** for each lesson, how many learners started vs. completed (bar chart)
+- **Session log:** recent container sessions — user, lesson, duration, status (running / stopped / error)
+- **Manual controls:** ability to stop a runaway session or reset a user's progress
+
+---
+
+## 6. Module 4 — API Key Flow
+
+Module 4 requires OpenAI (for LLM calls) and Pinecone (for vector storage). Learners supply their own keys.
+
+**In-app guidance for each service:**
+
+> **OpenAI API Key**
+> 1. Go to [platform.openai.com](https://platform.openai.com) and sign in (or create a free account)
+> 2. Click your profile icon → "API keys" → "Create new secret key"
+> 3. Copy the key (starts with `sk-…`) and paste it here
+> ⚠️ Running Module 4 notebooks uses OpenAI credits. Typical cost for the full lesson: ~$0.05–$0.50 depending on usage.
+
+Keys are stored as encrypted references (not plaintext) in the DB. At session start, the Platform API injects them as environment variables into the Fargate task definition so notebooks can read them via `os.environ["OPENAI_API_KEY"]`.
+
+---
+
+## 7. Technical Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React + Vite (TypeScript) |
+| Platform API | Express (Node, TypeScript) |
+| Auth | Clerk — Google OAuth only |
+| Container runtime | AWS ECS / Fargate |
+| Container registry | Amazon ECR |
+| Pre-built image | Custom Dockerfile (Python 3.11 + all deps) |
+| Dataset storage | Amazon S3 |
+| Database | PostgreSQL + Drizzle ORM |
+| Notebook server | JupyterLab 4 (inside container) |
+| Encryption | AWS KMS for API key encryption |
+
+---
+
+## 8. Build Phases
+
+### Phase 1 — Foundation (backend + auth + dashboard shell)
+- Clerk Google OAuth integration
+- Postgres schema: users, lessons, progress, sessions
+- Lesson data seeded from curriculum map
+- Course dashboard (static — no container yet; lessons show as "Coming soon")
+- Admin dashboard skeleton
+
+### Phase 2 — Container Infrastructure
+- Dockerfile + `bootstrap.sh` + ECR image pipeline
+- Platform API routes: `POST /sessions` (start), `GET /sessions/:id` (status), `DELETE /sessions/:id` (stop)
+- AWS ECS / Fargate integration in the API
+- S3 setup for datasets and notebook state
+- Lesson entry flow with loading state + iframe embed
+
+### Phase 3 — Learning Experience
+- Cell-level progress tracking (Jupyter kernel message monitoring)
 - Resume exactly where you left off
-- Instructor dashboard
-- Help sidebar with glossary + feedback
+- Session auto-pause / auto-stop
+- Full admin dashboard with charts and session log
 
-### Phase 4 — Scale & Polish
-- Auto-pause/resume idle containers
-- Module 4 AI proxying
-- Certificate of completion
-- Social: share your progress
+### Phase 4 — Module 4 + Polish
+- API key management UI and encrypted storage
+- Per-service setup guides
+- Completion certificates
+- Mobile-responsive layout
 
 ---
 
-*Review this spec and answer the open questions in Section 8 — then I'll start building.*
+## 9. Key Risks & Mitigations
+
+| Risk | Mitigation |
+|---|---|
+| Docker image build fails (C compiler deps, version conflicts) | Build and smoke-test image in CI before any user-facing work |
+| Cold-start time exceeds user patience | Show a friendly loading experience; pre-warm containers during off-peak hours |
+| Large dataset downloads slow notebook start | Stream datasets from S3 with `wget -q`; show per-file progress in bootstrap |
+| Fargate cost at scale | Auto-stop idle containers aggressively (30 min timeout); spot instances for dev |
+| JupyterLab iframe blocked by browser | Serve containers on a subdomain of the app domain to avoid cross-origin restrictions |
+| Module 4 API key leakage | Never log env vars; rotate encryption keys; keys never returned to frontend |
+
+---
+
+*Spec finalized. Ready to build on your go-ahead.*
