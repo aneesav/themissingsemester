@@ -1,4 +1,4 @@
-modules = ["nodejs-24", "postgresql-16"]
+modules = ["nodejs-24", "postgresql-16", "python-base-3.13"]
 
 [deployment]
 router = "application"
@@ -21,3 +21,16 @@ timeoutMs = 20000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+AWS_REGION = "us-east-1"
+ECR_REPOSITORY_URI = "748999352678.dkr.ecr.us-east-1.amazonaws.com/missing-semester/jupyter"
+ECS_CLUSTER = "missing-semester-cluster"
+ECS_EXECUTION_ROLE_ARN = "arn:aws:iam::748999352678:role/missing-semester-ecs-execution-role"
+ECS_SECURITY_GROUP = "sg-0518b7660ddf00c39"
+ECS_SUBNETS = "subnet-0fa5e1d4983010a1b,subnet-034f8943b54a69b7b,subnet-036a442cb97ea191e"
+ECS_TASK_DEFINITION = "missing-semester-jupyter"
+ECS_TASK_ROLE_ARN = "arn:aws:iam::748999352678:role/missing-semester-ecs-task-role"
+S3_BUCKET = "missing-semester-data-748999352678"

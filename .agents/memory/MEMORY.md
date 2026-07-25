@@ -1,0 +1,2 @@
+- [AWS Infrastructure](aws-infrastructure.md) — ECR, S3, ECS cluster, IAM roles, security group all provisioned in us-east-1; Docker image not yet built
+- [Session Launch Flow](session-launch-flow.md) — bootstrap.sh ready signal pattern, token sentinel in containerUrl, ECS IP resolution via ENI
