@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install all Python dependencies
 # This is the slow step (~20 min). Docker layer cache means it only reruns
 # when requirements.txt changes.
-COPY docker/requirements.txt /tmp/requirements.txt
+COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r /tmp/requirements.txt
 
@@ -52,7 +52,7 @@ RUN useradd -m -s /bin/bash learner
 WORKDIR /home/learner
 
 # Copy and set up bootstrap script
-COPY docker/bootstrap.sh /opt/bootstrap.sh
+COPY bootstrap.sh /opt/bootstrap.sh
 RUN chmod +x /opt/bootstrap.sh
 
 EXPOSE 8888
