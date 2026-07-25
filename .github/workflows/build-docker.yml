@@ -1,0 +1,115 @@
+name: Build & Push JupyterLab Image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docker/**"          # Dockerfile, bootstrap.sh, requirements.txt
+      - ".github/workflows/build-docker.yml"
+  workflow_dispatch:         # allow manual trigger from GitHub UI
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 748999352678.dkr.ecr.us-east-1.amazonaws.com
+  ECR_REPOSITORY: missing-semester/jupyter
+  ECS_CLUSTER: missing-semester-cluster
+  ECS_TASK_DEFINITION: missing-semester-jupyter
+
+jobs:
+  build-and-push:
+    name: Build image and push to ECR
+    runs-on: ubuntu-latest
+    # Larger runner recommended for the heavy bioinformatics build
+    # (uncomment if you have GitHub Teams/Enterprise):
+    # runs-on: ubuntu-latest-16-core
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          # BuildKit cache speeds up repeated builds significantly
+          driver-opts: image=moby/buildkit:latest
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('docker/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          build-args: |
+            BUILD_DATE=${{ github.event.repository.updated_at }}
+            GIT_SHA=${{ github.sha }}
+
+      # Workaround for cache growth issue with buildx
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Register new ECS task definition revision
+        id: task-def
+        run: |
+          # Fetch current task definition, swap in the new image SHA tag, re-register
+          CURRENT=$(aws ecs describe-task-definition \
+            --task-definition $ECS_TASK_DEFINITION \
+            --query 'taskDefinition' --output json)
+
+          NEW_IMAGE="${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ github.sha }}"
+
+          NEW_DEF=$(echo "$CURRENT" | python3 - "$NEW_IMAGE" << 'PYEOF'
+          import sys, json
+          new_image = sys.argv[1]
+          td = json.load(sys.stdin)
+          # Strip read-only fields ECS won't accept on register
+          for key in ['taskDefinitionArn','revision','status','requiresAttributes',
+                      'compatibilities','registeredAt','registeredBy']:
+              td.pop(key, None)
+          td['containerDefinitions'][0]['image'] = new_image
+          print(json.dumps(td))
+          PYEOF
+          )
+
+          NEW_ARN=$(echo "$NEW_DEF" | aws ecs register-task-definition \
+            --cli-input-json /dev/stdin \
+            --query 'taskDefinition.taskDefinitionArn' --output text)
+
+          echo "task_def_arn=$NEW_ARN" >> $GITHUB_OUTPUT
+          echo "Registered: $NEW_ARN"
+
+      - name: Summary
+        run: |
+          echo "## ✅ Docker build complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| | |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Image** | \`${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Task definition** | \`${{ steps.task-def.outputs.task_def_arn }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "New sessions will automatically use this image." >> $GITHUB_STEP_SUMMARY
