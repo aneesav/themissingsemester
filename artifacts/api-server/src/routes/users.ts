@@ -1,5 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { getAuth } from "@clerk/express";
+import { getAuth, clerkClient } from "@clerk/express";
 import { eq } from "drizzle-orm";
 import { db, usersTable } from "@workspace/db";
 import { requireAuth, type AuthedRequest } from "../middlewares/requireAuth";
@@ -31,9 +31,18 @@ router.post("/users/sync", async (req: Request, res: Response): Promise<void> =>
     return;
   }
 
-  const { email, name } = req.body as { email?: string; name?: string };
-  if (!email || !name) {
-    res.status(400).json({ error: "email and name are required" });
+  // Fetch profile from Clerk — never trust the client for identity fields.
+  const clerkUser = await clerkClient.users.getUser(clerkId);
+  const email =
+    clerkUser.primaryEmailAddress?.emailAddress ??
+    clerkUser.emailAddresses[0]?.emailAddress;
+  const name =
+    [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
+    email?.split("@")[0] ||
+    "Learner";
+
+  if (!email) {
+    res.status(400).json({ error: "No email address on Clerk account" });
     return;
   }
 

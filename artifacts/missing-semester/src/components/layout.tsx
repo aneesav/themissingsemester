@@ -16,14 +16,13 @@ export function Layout({ children }: { children: ReactNode }) {
   
   useEffect(() => {
     if (isLoaded && isSignedIn && !hasSynced) {
-      syncUserMutation.mutate(undefined, {
-        onSuccess: () => setHasSynced(true),
-        onError: () => {
-          // If sync fails, maybe it's fine, but let's try to fetch user
-        }
-      });
+      // Mark synced immediately so a failure can't re-trigger this effect
+      // in a loop (the mutation object identity changes every render).
+      setHasSynced(true);
+      syncUserMutation.mutate(undefined);
     }
-  }, [isLoaded, isSignedIn, hasSynced, syncUserMutation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, isSignedIn, hasSynced]);
 
   const { data: dbUser, isError: userError } = useGetCurrentUser({
     query: {
