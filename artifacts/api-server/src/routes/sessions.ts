@@ -124,25 +124,46 @@ router.patch("/sessions/:sessionId/ready", async (req: Request, res: Response): 
     return;
   }
 
-  // Resolve the container's public IP from ECS/EC2
-  const publicIp = await resolveTaskPublicIp(session.ecsTaskArn);
+  // Only a starting session can transition; repeated/forged calls are no-ops.
+  if (session.status !== "starting") {
+    res.sendStatus(204);
+    return;
+  }
 
   // Extract the Jupyter token we stored temporarily
   const token = session.containerUrl?.startsWith("__token__")
     ? session.containerUrl.slice("__token__".length)
     : null;
 
+  // Authenticate the container: bootstrap.sh sends its Jupyter token as a
+  // bearer header. If a header is present it must match. (Absent header is
+  // tolerated only until all container images send it — see docker/bootstrap.sh.)
+  const authHeader = req.get("authorization");
+  if (authHeader) {
+    if (!token || authHeader !== `Bearer ${token}`) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+  } else {
+    req.log.warn({ sessionId }, "ready called without bearer token (old container image)");
+  }
+
+  // Resolve the container's public IP from ECS/EC2 — this also implicitly
+  // verifies that a real task for this session is actually running.
+  const publicIp = await resolveTaskPublicIp(session.ecsTaskArn);
+
   const containerUrl = publicIp && token
     ? `http://${publicIp}:8888/lab?token=${token}`
     : null;
 
-  const [updated] = await db
+  await db
     .update(sessionsTable)
     .set({ status: "running", containerUrl })
-    .where(eq(sessionsTable.id, sessionId))
-    .returning();
+    .where(eq(sessionsTable.id, sessionId));
 
-  res.json(updated);
+  // Never return session data (containerUrl carries the Jupyter token) —
+  // this endpoint is reachable by the container network, not just users.
+  res.sendStatus(204);
 });
 
 // GET /sessions/active — must come before /:sessionId
@@ -154,6 +175,13 @@ router.get("/sessions/active", requireAuth, async (req: Request, res: Response):
     .where(and(eq(sessionsTable.userId, authed.userId), eq(sessionsTable.status, "running")))
     .orderBy(desc(sessionsTable.createdAt))
     .limit(1);
+
+  if (session) {
+    await db
+      .update(sessionsTable)
+      .set({ lastSeenAt: new Date() })
+      .where(eq(sessionsTable.id, session.id));
+  }
 
   res.json({ session: session ?? null });
 });
@@ -176,6 +204,14 @@ router.get("/sessions/:sessionId", requireAuth, async (req: Request, res: Respon
   if (!session) {
     res.status(404).json({ error: "Session not found" });
     return;
+  }
+
+  // Heartbeat: polling this endpoint keeps the session alive for the reaper
+  if (["starting", "running"].includes(session.status)) {
+    await db
+      .update(sessionsTable)
+      .set({ lastSeenAt: new Date() })
+      .where(eq(sessionsTable.id, sessionId));
   }
 
   // If still starting and we have a task ARN, check if ECS is running yet

@@ -54,6 +54,7 @@ if [ -n "$PLATFORM_API_URL" ] && [ -n "$SESSION_ID" ]; then
   curl -s -X PATCH \
     "${PLATFORM_API_URL}/api/sessions/${SESSION_ID}/ready" \
     -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${JUPYTER_TOKEN}" \
     -d '{"status":"running"}' || echo "[bootstrap] Warning: could not signal platform API"
 fi
 

@@ -42,11 +42,25 @@ export default function LessonDetail() {
       queryKey: getGetSessionQueryKey(pollingSessionId || 0),
       refetchInterval: (query) => {
         const data = query.state?.data as any;
-        if (data?.status === "running" || data?.status === "error") return false;
+        if (data?.status === "error" || data?.status === "stopped") return false;
+        // While running, keep polling slowly as a heartbeat so the server
+        // knows the tab is still open (the reaper stops abandoned containers).
+        if (data?.status === "running") return 60_000;
         return 3000;
-      }
+      },
+      // Keep heartbeating even when this tab is unfocused (e.g. the learner
+      // is working in the Jupyter tab) so the reaper doesn't kill the session.
+      refetchIntervalInBackground: true
     }
   });
+
+  // If a session for this lesson is already active (e.g. page reload),
+  // start polling it so the heartbeat keeps it alive.
+  useEffect(() => {
+    if (isThisLessonActive && activeSession && !pollingSessionId) {
+      setPollingSessionId(activeSession.id);
+    }
+  }, [isThisLessonActive, activeSession, pollingSessionId]);
 
   const createSession = useCreateSession();
   const stopSession = useStopSession();

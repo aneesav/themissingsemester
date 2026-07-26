@@ -29,3 +29,8 @@ description: How JupyterLab container sessions are started, tracked, and surface
 ## Why
 
 The ready-signal pattern decouples the slow bootstrap (pip install nothing, but data download + JupyterLab startup) from the API response. The frontend gets an immediate `201 starting` response and polls for readiness rather than blocking the HTTP request.
+
+## Session lifecycle hardening (2026-07-25)
+
+- **Idle reaper**: `sessions.last_seen_at` heartbeat column; GET session endpoints touch it while status is starting/running. Server sweeps every 60s and stops ECS tasks unseen for 10 min. Reaper uses a conditional UPDATE (status + staleness re-checked) before `stopTask` so a late heartbeat wins the race. Frontend polls the session every 60s while running with `refetchIntervalInBackground: true`.
+- **`/sessions/:id/ready` hardening**: unauthenticated by necessity (called by container), but now returns 204 with no body (never leak token-bearing containerUrl), only transitions from `starting`, and enforces `Authorization: Bearer <jupyter token>` *when the header is present*. bootstrap.sh now sends that header — but the deployed image predates it, so the server tolerates missing headers until the Docker image is rebuilt. **To close fully: push `docker/bootstrap.sh` to GitHub (needs a PAT — all deleted) so CI rebuilds, then make the header mandatory.**

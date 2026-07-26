@@ -12,6 +12,7 @@ export const sessionsTable = pgTable("sessions", {
   containerUrl: text("container_url"),
   ecsTaskArn: text("ecs_task_arn"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
   endedAt: timestamp("ended_at", { withTimezone: true }),
 });
 
