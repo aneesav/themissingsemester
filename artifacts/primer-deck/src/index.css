@@ -21,7 +21,7 @@
   --slide-gridline: #f0f0f0;
   --font-display-family: 'Space Grotesk', system-ui, sans-serif;
   --font-body-family: 'Inter', system-ui, sans-serif;
-  --font-mono-family: 'JetBrains Mono', monospace;
+  --font-mono-family: 'Inter', system-ui, sans-serif;
   color-scheme: light;
 }
 
