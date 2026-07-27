@@ -16,8 +16,8 @@ export default function ClosingSlide() {
       </p>
 
       <div className="flex items-center justify-between border-t border-gridline pt-[2.5vh] font-mono max-w-[80vw]">
-        <span className="text-text text-[1.1vw] tracking-[0.1em]">primer.bio</span>
-        <span className="text-muted text-[1.1vw] tracking-[0.1em]">hello@primer.bio</span>
+        <span className="text-text text-[1.1vw] tracking-[0.1em]">impaktbio.com</span>
+        <span className="text-muted text-[1.1vw] tracking-[0.1em]">info@impaktbio.com</span>
         <span className="text-primary text-[1.1vw] tracking-[0.1em] uppercase">
           Join the beta
         </span>

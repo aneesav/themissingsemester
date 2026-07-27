@@ -31,9 +31,17 @@ export default function TitleSlide() {
       </div>
 
       <div className="absolute bottom-[5vh] left-[10vw] right-[5vw] flex items-center justify-end border-t border-gridline pt-[2vh] font-mono">
-        <span className="text-text text-[0.95vw] tracking-[0.08em]">
-          Primer, by impaktbio intelligence partners
-        </span>
+        <div className="flex items-center gap-[1vw]">
+          <span className="text-muted text-[0.95vw] tracking-[0.08em]">
+            an impaktbio product
+          </span>
+          <img
+            src={`${import.meta.env.BASE_URL}impaktbio-logo.png`}
+            crossOrigin="anonymous"
+            alt="ImpaktBio logo"
+            className="h-[1.8vw] w-auto"
+          />
+        </div>
       </div>
     </div>
   );
