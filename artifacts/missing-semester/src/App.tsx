@@ -76,7 +76,7 @@ const clerkAppearance = {
     formFieldSuccessText: "text-success text-sm",
     alertText: "text-sm font-medium",
     logoBox: "mb-2 h-10 flex items-center justify-center",
-    logoImage: "h-8 w-auto",
+    logoImage: "h-10 w-auto",
     socialButtonsBlockButton: "border border-input bg-background hover:bg-accent hover:text-accent-foreground text-foreground",
     formButtonPrimary: "bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-medium",
     formFieldInput: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",

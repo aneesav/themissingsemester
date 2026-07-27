@@ -1,5 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flask-conical">
-  <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a2 2 0 0 0 1.8 2.95h10.96a2 2 0 0 0 1.8-2.95L14.21 10.423A2 2 0 0 1 14 9.527V2" />
-  <path d="M8.5 2h7" />
-  <path d="M14 16H5.3" />
+<svg width="260" height="56" viewBox="0 0 260 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <text x="2" y="16" font-size="15" font-weight="700" fill="#1A1A1A" font-family="Inter, Arial, sans-serif">5'</text>
+  <rect x="2" y="24" width="64" height="10" rx="2" fill="#FBD84A"/>
+  <rect x="2" y="40" width="40" height="10" rx="2" fill="#00B44B"/>
+  <text x="84" y="43" font-size="26" font-weight="700" letter-spacing="7" fill="#1A1A1A" font-family="Inter, Arial, sans-serif">PRIMER</text>
 </svg>
