@@ -9,7 +9,7 @@ export default function ProblemSlide() {
       </div>
 
       <h2 className="font-display text-text text-[4.2vw] font-bold leading-[1.05] tracking-[-0.02em] m-0 mb-[6vh] max-w-[72vw] [text-wrap:balance]">
-        The people who generate the data can&rsquo;t analyze it.
+        Learning bioinformatics means fighting your computer first.
       </h2>
 
       <div className="grid grid-cols-3 gap-[3vw]">
@@ -18,17 +18,8 @@ export default function ProblemSlide() {
             Days
           </div>
           <p className="text-muted text-[1.5vw] leading-[1.4] m-0">
-            lost setting up environments, dependencies, and Docker before a
-            single line of analysis runs.
-          </p>
-        </div>
-        <div className="border-t-2 border-text pt-[2.5vh]">
-          <div className="font-display text-text text-[3.4vw] font-bold leading-none mb-[1.5vh]">
-            1 expert
-          </div>
-          <p className="text-muted text-[1.5vw] leading-[1.4] m-0">
-            per lab becomes the bottleneck &mdash; every sequencing run waits in
-            their queue.
+            spent installing tools, dependencies, and environments before the
+            first lesson even begins.
           </p>
         </div>
         <div className="border-t-2 border-text pt-[2.5vh]">
@@ -36,8 +27,17 @@ export default function ProblemSlide() {
             CLI wall
           </div>
           <p className="text-muted text-[1.5vw] leading-[1.4] m-0">
-            command-line tools shut out the biologists who understand the
-            experiment best.
+            most courses assume a working command line, shutting out curious
+            beginners on day one.
+          </p>
+        </div>
+        <div className="border-t-2 border-text pt-[2.5vh]">
+          <div className="font-display text-text text-[3.4vw] font-bold leading-none mb-[1.5vh]">
+            Give up
+          </div>
+          <p className="text-muted text-[1.5vw] leading-[1.4] m-0">
+            learners quit before they ever run real code &mdash; the setup, not
+            the science, defeats them.
           </p>
         </div>
       </div>

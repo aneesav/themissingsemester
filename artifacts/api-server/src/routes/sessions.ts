@@ -1,5 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, inArray } from "drizzle-orm";
 import { db, sessionsTable, apiKeysTable } from "@workspace/db";
 import { requireAuth, type AuthedRequest } from "../middlewares/requireAuth";
 import { CreateSessionBody } from "@workspace/api-zod";
@@ -36,18 +36,34 @@ router.post("/sessions", requireAuth, async (req: Request, res: Response): Promi
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const { lessonId } = parsed.data;
+  // lessonId is optional: a null/absent lessonId means a "fresh notebook"
+  // sandbox session not tied to any learning material.
+  const lessonId = parsed.data.lessonId ?? null;
 
-  // Resume an existing active session for this lesson
-  const [existing] = await db
+  // One active container per user: find the most recent active session.
+  // If it targets the same lesson (or is the sandbox when lessonId is null),
+  // resume it; otherwise refuse so a lesson session and a sandbox can't run
+  // concurrently.
+  const [active] = await db
     .select()
     .from(sessionsTable)
-    .where(and(eq(sessionsTable.userId, authed.userId), eq(sessionsTable.lessonId, lessonId)))
+    .where(
+      and(
+        eq(sessionsTable.userId, authed.userId),
+        inArray(sessionsTable.status, ["starting", "running", "paused"]),
+      ),
+    )
     .orderBy(desc(sessionsTable.createdAt))
     .limit(1);
 
-  if (existing && ["running", "paused", "starting"].includes(existing.status)) {
-    res.status(201).json(existing);
+  if (active) {
+    if (active.lessonId === lessonId) {
+      res.status(201).json(active);
+      return;
+    }
+    res.status(409).json({
+      error: "Another session is already active. Stop it before starting a new one.",
+    });
     return;
   }
 
@@ -172,7 +188,13 @@ router.get("/sessions/active", requireAuth, async (req: Request, res: Response):
   const [session] = await db
     .select()
     .from(sessionsTable)
-    .where(and(eq(sessionsTable.userId, authed.userId), eq(sessionsTable.status, "running")))
+    .where(
+      and(
+        eq(sessionsTable.userId, authed.userId),
+        // "starting" counts as active so the UI can gate launches during provisioning
+        inArray(sessionsTable.status, ["starting", "running"]),
+      ),
+    )
     .orderBy(desc(sessionsTable.createdAt))
     .limit(1);
 

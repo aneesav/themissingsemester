@@ -596,7 +596,8 @@ components:
         userId:
           type: integer
         lessonId:
-          type: integer
+          description: null for a fresh sandbox notebook not tied to a lesson.
+          type: ["integer", "null"]
         status:
           type: string
           enum: [starting, running, paused, stopped, error]
@@ -613,7 +614,6 @@ components:
       required:
         - id
         - userId
-        - lessonId
         - status
         - createdAt
 
@@ -631,9 +631,10 @@ components:
       type: object
       properties:
         lessonId:
-          type: integer
-      required:
-        - lessonId
+          description: >-
+            The lesson to launch. Omit (or null) to spin up a fresh sandbox
+            notebook not tied to any learning material.
+          type: ["integer", "null"]
 
     ApiKey:
       type: object
@@ -750,9 +751,9 @@ components:
         userName:
           type: string
         lessonId:
-          type: integer
+          type: ["integer", "null"]
         lessonTitle:
-          type: string
+          type: ["string", "null"]
         status:
           type: string
         createdAt:
@@ -768,7 +769,5 @@ components:
         - userId
         - userEmail
         - userName
-        - lessonId
-        - lessonTitle
         - status
         - createdAt

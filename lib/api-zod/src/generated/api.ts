@@ -142,13 +142,13 @@ export const UpdateProgressResponse = zod.object({
  * @summary Start or resume a notebook container session
  */
 export const CreateSessionBody = zod.object({
-  "lessonId": zod.number()
+  "lessonId": zod.number().nullish().describe('The lesson to launch. Omit (or null) to spin up a fresh sandbox notebook not tied to any learning material.')
 })
 
 export const CreateSessionResponse = zod.object({
   "id": zod.number(),
   "userId": zod.number(),
-  "lessonId": zod.number(),
+  "lessonId": zod.number().nullish().describe('null for a fresh sandbox notebook not tied to a lesson.'),
   "status": zod.enum(['starting', 'running', 'paused', 'stopped', 'error']),
   "containerUrl": zod.string().nullish(),
   "ecsTaskArn": zod.string().nullish(),
@@ -164,7 +164,7 @@ export const GetActiveSessionResponse = zod.object({
   "session": zod.union([zod.object({
   "id": zod.number(),
   "userId": zod.number(),
-  "lessonId": zod.number(),
+  "lessonId": zod.number().nullish().describe('null for a fresh sandbox notebook not tied to a lesson.'),
   "status": zod.enum(['starting', 'running', 'paused', 'stopped', 'error']),
   "containerUrl": zod.string().nullish(),
   "ecsTaskArn": zod.string().nullish(),
@@ -184,7 +184,7 @@ export const GetSessionParams = zod.object({
 export const GetSessionResponse = zod.object({
   "id": zod.number(),
   "userId": zod.number(),
-  "lessonId": zod.number(),
+  "lessonId": zod.number().nullish().describe('null for a fresh sandbox notebook not tied to a lesson.'),
   "status": zod.enum(['starting', 'running', 'paused', 'stopped', 'error']),
   "containerUrl": zod.string().nullish(),
   "ecsTaskArn": zod.string().nullish(),
@@ -299,8 +299,8 @@ export const ListAdminSessionsResponseItem = zod.object({
   "userId": zod.number(),
   "userEmail": zod.string(),
   "userName": zod.string(),
-  "lessonId": zod.number(),
-  "lessonTitle": zod.string(),
+  "lessonId": zod.number().nullish(),
+  "lessonTitle": zod.string().nullish(),
   "status": zod.string(),
   "createdAt": zod.coerce.date(),
   "endedAt": zod.coerce.date().nullish(),

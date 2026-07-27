@@ -9,27 +9,28 @@ export default function WhoSlide() {
       </div>
 
       <h2 className="font-display text-bg text-[4.2vw] font-bold leading-[1.05] tracking-[-0.02em] m-0 mb-[7vh] max-w-[60vw]">
-        Built for the bench, not the terminal.
+        Built for learners, not sysadmins.
       </h2>
 
       <div className="grid grid-cols-2 gap-[4vw] flex-1">
         <div className="border-t-2 border-accent pt-[3vh]">
           <div className="font-display text-bg text-[2.4vw] font-semibold mb-[2vh]">
-            Bench scientists
+            Students
           </div>
           <p className="text-bg/70 text-[1.6vw] leading-[1.5] m-0">
-            Biologists who run experiments and generate the data. They get
-            answers without waiting on a bioinformatics queue or learning the
-            command line.
+            Undergrads and grad students meeting bioinformatics for the first
+            time &mdash; learning the science without wrestling a toolchain into
+            place.
           </p>
         </div>
         <div className="border-t-2 border-primary pt-[3vh]">
           <div className="font-display text-bg text-[2.4vw] font-semibold mb-[2vh]">
-            Small labs &amp; cores
+            Researchers &amp; self-learners
           </div>
           <p className="text-bg/70 text-[1.6vw] leading-[1.5] m-0">
-            Teams without a dedicated computational staff. Primer gives every
-            member reproducible workflows and shared results in one place.
+            Scientists who want to pick up computational skills for their own
+            work, at their own pace, without a formal course or a support
+            queue.
           </p>
         </div>
       </div>

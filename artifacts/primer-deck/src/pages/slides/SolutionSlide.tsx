@@ -9,14 +9,14 @@ export default function SolutionSlide() {
       </div>
 
       <h2 className="font-display text-bg text-[5vw] font-bold leading-[1.05] tracking-[-0.02em] m-0 mb-[4vh] max-w-[70vw] [text-wrap:balance]">
-        Bioinformatics that opens in a
+        A full course that opens in a
         <span className="text-primary"> browser tab</span>.
       </h2>
 
       <p className="text-bg/70 text-[1.9vw] leading-[1.4] max-w-[58vw] m-0 mb-[6vh] [text-wrap:pretty]">
-        Primer spins up a ready-to-run analysis environment on demand. Upload
-        your reads, pick a workflow, and read the result &mdash; the compute
-        disappears behind the tab.
+        Primer runs an interactive bioinformatics curriculum in a ready-to-go
+        environment. Open a lesson, run real code against real data, and learn
+        by doing &mdash; the setup disappears behind the tab.
       </p>
 
       <div className="flex gap-[2vw] font-mono">
@@ -25,12 +25,12 @@ export default function SolutionSlide() {
           <div className="text-bg text-[1.5vw] leading-[1.3]">Nothing to install</div>
         </div>
         <div className="flex-1 bg-bg/5 border border-bg/15 px-[2vw] py-[3vh]">
-          <div className="text-accent text-[1vw] mb-[1vh] tracking-[0.1em]">MANAGED COMPUTE</div>
-          <div className="text-bg text-[1.5vw] leading-[1.3]">Cloud sessions on demand</div>
+          <div className="text-accent text-[1vw] mb-[1vh] tracking-[0.1em]">HANDS-ON</div>
+          <div className="text-bg text-[1.5vw] leading-[1.3]">Real code, real data</div>
         </div>
         <div className="flex-1 bg-bg/5 border border-bg/15 px-[2vw] py-[3vh]">
           <div className="text-accent text-[1vw] mb-[1vh] tracking-[0.1em]">GUIDED</div>
-          <div className="text-bg text-[1.5vw] leading-[1.3]">Workflows, not commands</div>
+          <div className="text-bg text-[1.5vw] leading-[1.3]">Lessons, not commands</div>
         </div>
       </div>
     </div>

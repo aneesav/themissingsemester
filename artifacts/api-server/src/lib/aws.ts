@@ -29,7 +29,8 @@ const ec2Client = new EC2Client({ region: REGION, credentials: awsCredentials() 
 
 export interface LaunchSessionOptions {
   sessionId: number;
-  lessonId: number;
+  // null = a "fresh notebook" sandbox session not tied to any lesson.
+  lessonId: number | null;
   platformApiUrl: string;
   apiKeys?: Record<string, string>; // service -> plaintext key
 }
@@ -40,7 +41,12 @@ export async function launchJupyterTask(
   const jupyterToken = crypto.randomBytes(32).toString("hex");
 
   const environment = [
-    { name: "LESSON_ID", value: String(opts.lessonId) },
+    // LESSON_ID is only set for lesson sessions. For a fresh notebook sandbox
+    // (lessonId === null) it is omitted, and bootstrap.sh skips loading any
+    // lesson content — the learner gets a clean workspace on the current image.
+    ...(opts.lessonId !== null
+      ? [{ name: "LESSON_ID", value: String(opts.lessonId) }]
+      : []),
     { name: "SESSION_ID", value: String(opts.sessionId) },
     { name: "S3_BUCKET", value: S3_BUCKET },
     { name: "PLATFORM_API_URL", value: opts.platformApiUrl },
@@ -68,7 +74,7 @@ export async function launchJupyterTask(
       },
       tags: [
         { key: "session-id", value: String(opts.sessionId) },
-        { key: "lesson-id", value: String(opts.lessonId) },
+        { key: "lesson-id", value: opts.lessonId !== null ? String(opts.lessonId) : "none" },
       ],
     }),
   );

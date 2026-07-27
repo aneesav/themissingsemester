@@ -7,5 +7,9 @@
  */
 
 export interface SessionInput {
-  lessonId: number;
+  /**
+     * The lesson to launch. Omit (or null) to spin up a fresh sandbox notebook not tied to any learning material.
+     * @nullable
+     */
+  lessonId?: number | null;
 }

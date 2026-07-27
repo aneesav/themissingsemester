@@ -139,7 +139,10 @@ export default function LessonDetail() {
                     </div>
                     <h3 className="text-lg font-semibold">Another session is running</h3>
                     <p className="text-muted-foreground text-sm max-w-md">
-                      You already have an active notebook running for Lesson {activeSession.lessonId}. 
+                      You already have an active notebook running
+                      {activeSession.lessonId != null
+                        ? ` for Lesson ${activeSession.lessonId}`
+                        : " (sandbox notebook)"}.
                       You must stop it before launching this one.
                     </p>
                     <Button variant="outline" onClick={handleStop} disabled={stopSession.isPending} className="mt-2">

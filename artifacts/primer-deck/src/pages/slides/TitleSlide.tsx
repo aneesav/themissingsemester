@@ -19,14 +19,14 @@ export default function TitleSlide() {
 
       <div className="absolute bottom-[12vh] left-[10vw] max-w-[70vw]">
         <div className="font-mono text-primary text-[1.1vw] font-medium tracking-[0.05em] mb-[3vh] uppercase">
-          Zero-setup bioinformatics for bench scientists
+          Learn bioinformatics in your browser
         </div>
         <h1 className="font-display text-text text-[9vw] font-bold leading-[0.95] tracking-[-0.03em] m-0 mb-[3vh]">
           Primer
         </h1>
         <p className="text-muted text-[1.9vw] font-normal leading-[1.4] max-w-[52vw] m-0 [text-wrap:pretty]">
-          Run real analyses from your browser. No installs, no command line,
-          no cluster queue &mdash; just your data and a result.
+          A hands-on bioinformatics course that runs in your browser. No
+          installs, no command line &mdash; open a lesson and start learning.
         </p>
       </div>
 

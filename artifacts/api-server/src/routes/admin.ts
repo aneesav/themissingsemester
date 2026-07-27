@@ -135,7 +135,9 @@ router.get("/admin/sessions", requireAdmin, async (_req: Request, res: Response)
     })
     .from(sessionsTable)
     .innerJoin(usersTable, eq(sessionsTable.userId, usersTable.id))
-    .innerJoin(lessonsTable, eq(sessionsTable.lessonId, lessonsTable.id))
+    // Left join: sandbox notebook sessions have a null lessonId and would be
+    // dropped from the admin view by an inner join.
+    .leftJoin(lessonsTable, eq(sessionsTable.lessonId, lessonsTable.id))
     .orderBy(sql`${sessionsTable.createdAt} DESC`)
     .limit(100);
 

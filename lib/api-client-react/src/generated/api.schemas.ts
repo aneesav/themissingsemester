@@ -89,7 +89,11 @@ export const SessionStatus = {
 export interface Session {
   id: number;
   userId: number;
-  lessonId: number;
+  /**
+     * null for a fresh sandbox notebook not tied to a lesson.
+     * @nullable
+     */
+  lessonId?: number | null;
   status: SessionStatus;
   /** @nullable */
   containerUrl?: string | null;
@@ -105,7 +109,11 @@ export interface SessionOrNull {
 }
 
 export interface SessionInput {
-  lessonId: number;
+  /**
+     * The lesson to launch. Omit (or null) to spin up a fresh sandbox notebook not tied to any learning material.
+     * @nullable
+     */
+  lessonId?: number | null;
 }
 
 export interface ApiKey {
@@ -155,8 +163,10 @@ export interface AdminSession {
   userId: number;
   userEmail: string;
   userName: string;
-  lessonId: number;
-  lessonTitle: string;
+  /** @nullable */
+  lessonId?: number | null;
+  /** @nullable */
+  lessonTitle?: string | null;
   status: string;
   createdAt: string;
   /** @nullable */

@@ -7,12 +7,13 @@ export default function ClosingSlide() {
       </div>
 
       <h2 className="font-display text-text text-[6vw] font-bold leading-[1.02] tracking-[-0.03em] m-0 mb-[3vh] max-w-[74vw] [text-wrap:balance]">
-        Give every scientist their own bioinformatician.
+        Learn bioinformatics by doing, not installing.
       </h2>
 
       <p className="text-muted text-[1.9vw] leading-[1.4] max-w-[54vw] m-0 mb-[7vh] [text-wrap:pretty]">
-        We&rsquo;re opening the beta to labs generating sequencing data today.
-        Bring a dataset &mdash; we&rsquo;ll get you to a result in an afternoon.
+        We&rsquo;re opening the beta to students, researchers, and anyone
+        curious about bioinformatics. Bring your curiosity &mdash; we&rsquo;ll
+        get you running real code in minutes.
       </p>
 
       <div className="flex items-center justify-between border-t border-gridline pt-[2.5vh] font-mono max-w-[80vw]">

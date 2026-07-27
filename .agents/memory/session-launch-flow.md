@@ -34,3 +34,10 @@ The ready-signal pattern decouples the slow bootstrap (pip install nothing, but 
 
 - **Idle reaper**: `sessions.last_seen_at` heartbeat column; GET session endpoints touch it while status is starting/running. Server sweeps every 60s and stops ECS tasks unseen for 10 min. Reaper uses a conditional UPDATE (status + staleness re-checked) before `stopTask` so a late heartbeat wins the race. Frontend polls the session every 60s while running with `refetchIntervalInBackground: true`.
 - **`/sessions/:id/ready` hardening**: unauthenticated by necessity (called by container), but now returns 204 with no body (never leak token-bearing containerUrl), only transitions from `starting`, and enforces `Authorization: Bearer <jupyter token>` *when the header is present*. bootstrap.sh now sends that header — but the deployed image predates it, so the server tolerates missing headers until the Docker image is rebuilt. **To close fully: push `docker/bootstrap.sh` to GitHub (needs a PAT — all deleted) so CI rebuilds, then make the header mandatory.**
+
+## Sandbox notebooks & single-active constraint (2026-07-27)
+
+- `sessions.lesson_id` is now nullable: null = "fresh notebook" sandbox not tied to any lesson. `LESSON_ID` env is omitted at ECS launch; bootstrap.sh already skips all lesson steps when it's empty, so no image rebuild was needed.
+- Server enforces at most one active (starting/running/paused) session per user: `POST /sessions` resumes when the target matches, otherwise 409. Backed by a partial unique index `one_active_session_per_user`.
+- `GET /sessions/active` now counts `starting` as active so the UI can gate launches during provisioning.
+- API types are orval-generated from `lib/api-spec/openapi.yaml` — edit the spec and run `pnpm --filter @workspace/api-spec run codegen`, never hand-edit `lib/api-zod` / `lib/api-client-react` generated files.

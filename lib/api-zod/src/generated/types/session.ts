@@ -10,7 +10,11 @@ import type { SessionStatus } from './sessionStatus';
 export interface Session {
   id: number;
   userId: number;
-  lessonId: number;
+  /**
+     * null for a fresh sandbox notebook not tied to a lesson.
+     * @nullable
+     */
+  lessonId?: number | null;
   status: SessionStatus;
   /** @nullable */
   containerUrl?: string | null;

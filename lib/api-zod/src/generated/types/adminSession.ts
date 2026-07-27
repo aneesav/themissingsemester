@@ -11,8 +11,10 @@ export interface AdminSession {
   userId: number;
   userEmail: string;
   userName: string;
-  lessonId: number;
-  lessonTitle: string;
+  /** @nullable */
+  lessonId?: number | null;
+  /** @nullable */
+  lessonTitle?: string | null;
   status: string;
   createdAt: Date;
   /** @nullable */

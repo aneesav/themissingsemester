@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Link } from "wouter";
 import { useListLessons, useListProgress, useListApiKeys } from "@workspace/api-client-react";
 import { BookOpen, Lock, CheckCircle2, Clock } from "lucide-react";
+import { SandboxCard } from "@/components/sandbox-card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
@@ -77,6 +78,8 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
+      <SandboxCard />
 
       {isLoading ? (
         <div className="space-y-6">
