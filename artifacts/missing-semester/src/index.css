@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 @layer theme, base, clerk, components, utilities;
 @import 'tailwindcss';
 @import '@clerk/themes/shadcn.css';
@@ -46,7 +46,7 @@
   --color-success-foreground: hsl(var(--success-foreground));
 
   --font-sans: "Inter", sans-serif;
-  --font-serif: "Newsreader", serif;
+  --font-serif: "Inter", sans-serif; /* Primer brand: sans-serif everywhere */
   --font-mono: "JetBrains Mono", monospace;
 
   --radius-sm: 2px;
@@ -56,76 +56,76 @@
 }
 
 :root {
-  /* Pristine white and deep navy for a scientific, academic feel */
-  --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
-  
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --card-border: 214 32% 91%;
+  /* Primer brand: warm cream base, ink black, signal green, highlight yellow */
+  --background: 45 25% 95%;
+  --foreground: 0 0% 10%;
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --popover-border: 214 32% 91%;
+  --card: 45 25% 97%;
+  --card-foreground: 0 0% 10%;
+  --card-border: 45 12% 86%;
 
-  --primary: 222 47% 11%;
+  --popover: 45 25% 97%;
+  --popover-foreground: 0 0% 10%;
+  --popover-border: 45 12% 86%;
+
+  --primary: 146 100% 35%;
   --primary-foreground: 0 0% 100%;
-  
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
 
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
+  --secondary: 45 18% 90%;
+  --secondary-foreground: 0 0% 10%;
 
-  --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
+  --muted: 45 18% 90%;
+  --muted-foreground: 0 0% 38%;
+
+  --accent: 48 96% 64%;
+  --accent-foreground: 0 0% 10%;
 
   --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive-foreground: 0 0% 100%;
 
-  --success: 142 71% 45%;
+  --success: 146 100% 35%;
   --success-foreground: 0 0% 100%;
 
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 222 47% 11%;
+  --border: 45 12% 86%;
+  --input: 45 12% 86%;
+  --ring: 146 100% 35%;
 
   --radius: 6px;
 }
 
 .dark {
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
+  --background: 0 0% 10%;
+  --foreground: 45 25% 95%;
 
-  --card: 222 47% 11%;
-  --card-foreground: 210 40% 98%;
-  --card-border: 217 33% 17%;
+  --card: 0 0% 13%;
+  --card-foreground: 45 25% 95%;
+  --card-border: 0 0% 20%;
 
-  --popover: 222 47% 11%;
-  --popover-foreground: 210 40% 98%;
-  --popover-border: 217 33% 17%;
+  --popover: 0 0% 13%;
+  --popover-foreground: 45 25% 95%;
+  --popover-border: 0 0% 20%;
 
-  --primary: 210 40% 98%;
-  --primary-foreground: 222 47% 11%;
+  --primary: 146 100% 40%;
+  --primary-foreground: 0 0% 10%;
 
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 98%;
+  --secondary: 0 0% 18%;
+  --secondary-foreground: 45 25% 95%;
 
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20.2% 65.1%;
+  --muted: 0 0% 18%;
+  --muted-foreground: 0 0% 63%;
 
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
+  --accent: 48 96% 64%;
+  --accent-foreground: 0 0% 10%;
 
   --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive-foreground: 45 25% 95%;
 
-  --success: 142 71% 45%;
-  --success-foreground: 0 0% 100%;
+  --success: 146 100% 40%;
+  --success-foreground: 0 0% 10%;
 
-  --border: 217 33% 17%;
-  --input: 217 33% 17%;
-  --ring: 212.7 26.8% 83.9%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 146 100% 40%;
 }
 
 @layer base {

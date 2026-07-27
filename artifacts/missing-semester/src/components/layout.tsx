@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useClerk, useUser } from "@clerk/react";
 import { BookOpen, Settings, ShieldAlert, LogOut } from "lucide-react";
 import { useGetCurrentUser, useSyncUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
+import { BrandMark, BrandWordmark } from "@/components/brand-mark";
 import { useEffect, useState } from "react";
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -53,11 +54,9 @@ export function Layout({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className="w-full md:w-64 border-r bg-card shrink-0 flex flex-col shadow-sm z-10 relative">
         <div className="p-6 pb-2">
-          <Link href="/dashboard" className="flex items-center gap-3 mb-6 transition-opacity hover:opacity-80">
-            <div className="w-8 h-8 rounded bg-primary text-primary-foreground flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a2 2 0 0 0 1.8 2.95h10.96a2 2 0 0 0 1.8-2.95L14.21 10.423A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M14 16H5.3"/></svg>
-            </div>
-            <span className="font-serif font-semibold text-lg leading-tight tracking-tight">The Missing<br/>Semester</span>
+          <Link href="/dashboard" className="flex items-center gap-3 mb-6 transition-opacity hover:opacity-80 text-foreground">
+            <BrandMark className="w-7 h-7" />
+            <BrandWordmark className="text-lg" />
           </Link>
         </div>
 

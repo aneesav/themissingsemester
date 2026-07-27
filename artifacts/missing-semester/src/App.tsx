@@ -155,13 +155,13 @@ function ClerkProviderWithRoutes() {
       localization={{
         signIn: {
           start: {
-            title: "Welcome to The Missing Semester",
+            title: "Welcome to Primer",
             subtitle: "Sign in to continue your research",
           },
         },
         signUp: {
           start: {
-            title: "Join The Missing Semester",
+            title: "Join Primer",
             subtitle: "Bioinformatics without the setup",
           },
         },
