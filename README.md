@@ -30,7 +30,7 @@ The easiest way to get started is to install the package with all its dependenci
 
 ```bash
 git clone https://github.com/aneesav/themissingsemester.git
-cd themissingsemester
+cd themissingsemester/python-package
 pip install -e .
 ```
 
@@ -42,11 +42,11 @@ If you prefer a more traditional approach:
 
 ```bash
 git clone https://github.com/aneesav/themissingsemester.git
-cd themissingsemester
+cd themissingsemester/python-package
 pip install -r requirements.txt
 ```
 
-This will install all dependecies specified in `requirements.txt` at the root level.
+This will install all dependecies specified in `python-package/requirements.txt`.
 
 ### Option 3: With Jupyter Support
 
