@@ -152,16 +152,12 @@ router.patch("/sessions/:sessionId/ready", async (req: Request, res: Response): 
     : null;
 
   // Authenticate the container: bootstrap.sh sends its Jupyter token as a
-  // bearer header. If a header is present it must match. (Absent header is
-  // tolerated only until all container images send it — see docker/bootstrap.sh.)
+  // bearer header. The header is mandatory — all container images now send it
+  // (see docker/bootstrap.sh).
   const authHeader = req.get("authorization");
-  if (authHeader) {
-    if (!token || authHeader !== `Bearer ${token}`) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
-  } else {
-    req.log.warn({ sessionId }, "ready called without bearer token (old container image)");
+  if (!authHeader || !token || authHeader !== `Bearer ${token}`) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
   }
 
   // Resolve the container's public IP from ECS/EC2 — this also implicitly
