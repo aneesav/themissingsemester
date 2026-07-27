@@ -1,0 +1,27 @@
+kind = "slides"
+previewPath = "/primer-deck/"
+title = "Primer Pitch Deck"
+version = "1.0.0"
+id = "artifacts/primer-deck"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/primer-deck/" ]
+localPort = 19914
+
+[services.development]
+run = "pnpm --filter @workspace/primer-deck run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/primer-deck", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/primer-deck/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19914"
+BASE_PATH = "/primer-deck/"
