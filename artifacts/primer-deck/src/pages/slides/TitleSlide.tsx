@@ -1,10 +1,12 @@
 export default function TitleSlide() {
   return (
     <div className="w-screen h-screen overflow-hidden relative bg-bg font-body grid-bg">
-      <div className="absolute top-[5vh] left-[5vw] flex gap-[0.5vw]">
-        <div className="w-[1.4vw] h-[3vw] bg-accent" />
-        <div className="w-[1.4vw] h-[3vw] bg-primary" />
-      </div>
+      <img
+        src={`${import.meta.env.BASE_URL}primer-logo.png`}
+        crossOrigin="anonymous"
+        alt="Primer logo"
+        className="absolute top-[5vh] left-[5vw] w-[20vw] h-auto"
+      />
 
       <div className="absolute top-[5.5vh] right-[5vw] text-right font-mono">
         <div className="text-primary text-[0.9vw] font-medium uppercase tracking-[0.15em] mb-[0.5vh]">
@@ -28,12 +30,9 @@ export default function TitleSlide() {
         </p>
       </div>
 
-      <div className="absolute bottom-[5vh] left-[10vw] right-[5vw] flex items-center justify-between border-t border-gridline pt-[2vh] font-mono">
-        <span className="text-muted text-[0.85vw] tracking-[0.1em] uppercase">
-          Seed pitch
-        </span>
-        <span className="text-text text-[0.85vw] tracking-[0.1em] uppercase">
-          primer.bio
+      <div className="absolute bottom-[5vh] left-[10vw] right-[5vw] flex items-center justify-end border-t border-gridline pt-[2vh] font-mono">
+        <span className="text-text text-[0.95vw] tracking-[0.08em]">
+          Primer, by impaktbio intelligence partners
         </span>
       </div>
     </div>
