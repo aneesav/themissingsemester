@@ -25,7 +25,7 @@ export function Layout({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, isSignedIn, hasSynced]);
 
-  const { data: dbUser, isError: userError } = useGetCurrentUser({
+  const { data: dbUser, isError: userError, refetch: refetchUser } = useGetCurrentUser({
     query: {
       enabled: isLoaded && isSignedIn,
       retry: false,
@@ -33,18 +33,58 @@ export function Layout({ children }: { children: ReactNode }) {
     }
   });
 
+  // Once the sync completes, re-fetch the current user (the first fetch can
+  // race the sync and 401 with "user not found").
+  const syncSucceeded = syncUserMutation.isSuccess;
   useEffect(() => {
+    if (syncSucceeded) {
+      refetchUser();
+    }
+  }, [syncSucceeded, refetchUser]);
+
+  useEffect(() => {
+    // Only Clerk decides signed-in state. Never bounce to /sign-in on an API
+    // error while Clerk says we're signed in — Clerk immediately redirects
+    // back, producing an infinite blank-page loop.
     if (isLoaded && !isSignedIn) {
       setLocation("/sign-in");
     }
-    if (userError) {
-      // 401 from API usually
-      setLocation("/sign-in");
-    }
-  }, [isLoaded, isSignedIn, userError, setLocation]);
+  }, [isLoaded, isSignedIn, setLocation]);
 
   if (!isLoaded || (!isSignedIn && window.location.pathname !== "/")) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-pulse">Loading environment...</div></div>;
+  }
+
+  // Signed in with Clerk but the API can't authenticate us — show a real
+  // error instead of redirect-looping.
+  if (userError && !syncUserMutation.isPending && (syncUserMutation.isError || syncSucceeded)) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="max-w-md text-center space-y-4">
+          <p className="font-semibold text-lg">We couldn't load your account</p>
+          <p className="text-sm text-muted-foreground">
+            You're signed in, but the server rejected the request. This is usually temporary.
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <button
+              className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
+              onClick={() => {
+                setHasSynced(false);
+                refetchUser();
+              }}
+            >
+              Try again
+            </button>
+            <button
+              className="px-4 py-2 rounded-md border text-sm font-medium hover:bg-accent"
+              onClick={() => signOut()}
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
