@@ -6,19 +6,22 @@
   --color-bg: var(--slide-bg);
   --color-text: var(--slide-text);
   --color-muted: var(--slide-muted);
+  --color-gridline: var(--slide-gridline);
   --font-display: var(--font-display-family);
   --font-body: var(--font-body-family);
+  --font-mono: var(--font-mono-family);
 }
 
 :root {
-  /* Replace these with brand colors */
-  --slide-primary: #4f46e5;
-  --slide-accent: #06b6d4;
-  --slide-bg: #f8fafc;
-  --slide-text: #0f172a;
-  --slide-muted: #64748b;
-  --font-display-family: 'Inter', system-ui, sans-serif;
+  --slide-primary: #00b44b;
+  --slide-accent: #fbd84a;
+  --slide-bg: #fdfdfc;
+  --slide-text: #111111;
+  --slide-muted: #666666;
+  --slide-gridline: #f0f0f0;
+  --font-display-family: 'Space Grotesk', system-ui, sans-serif;
   --font-body-family: 'Inter', system-ui, sans-serif;
+  --font-mono-family: 'JetBrains Mono', monospace;
   color-scheme: light;
 }
 
@@ -33,6 +36,12 @@ body,
 body {
   background: var(--slide-bg);
   color: var(--slide-text);
+}
+
+.grid-bg {
+  background-image: linear-gradient(to right, var(--slide-gridline) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--slide-gridline) 1px, transparent 1px);
+  background-size: 5vw 5vh;
 }
 
 .slide {

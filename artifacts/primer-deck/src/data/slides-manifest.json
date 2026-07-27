@@ -1,1 +1,66 @@
-[]
+[
+  {
+    "id": "a1f0c2e4-1b2c-4d3e-8f10-000000000001",
+    "position": 1,
+    "filepath": "src/pages/slides/TitleSlide.tsx",
+    "title": "Primer",
+    "description": "Title slide",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1f0c2e4-1b2c-4d3e-8f10-000000000002",
+    "position": 2,
+    "filepath": "src/pages/slides/ProblemSlide.tsx",
+    "title": "The Problem",
+    "description": "The people who generate data can't analyze it",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1f0c2e4-1b2c-4d3e-8f10-000000000003",
+    "position": 3,
+    "filepath": "src/pages/slides/SolutionSlide.tsx",
+    "title": "The Solution",
+    "description": "Bioinformatics in a browser tab",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1f0c2e4-1b2c-4d3e-8f10-000000000004",
+    "position": 4,
+    "filepath": "src/pages/slides/HowItWorksSlide.tsx",
+    "title": "How It Works",
+    "description": "Upload, run, read",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1f0c2e4-1b2c-4d3e-8f10-000000000005",
+    "position": 5,
+    "filepath": "src/pages/slides/ArchitectureSlide.tsx",
+    "title": "Under the Hood",
+    "description": "Isolated sessions per user",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1f0c2e4-1b2c-4d3e-8f10-000000000006",
+    "position": 6,
+    "filepath": "src/pages/slides/MarketSlide.tsx",
+    "title": "Why Now",
+    "description": "Sequencing got cheap, analysis didn't get easier",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1f0c2e4-1b2c-4d3e-8f10-000000000007",
+    "position": 7,
+    "filepath": "src/pages/slides/WhoSlide.tsx",
+    "title": "Who It's For",
+    "description": "Bench scientists and small labs",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1f0c2e4-1b2c-4d3e-8f10-000000000008",
+    "position": 8,
+    "filepath": "src/pages/slides/ClosingSlide.tsx",
+    "title": "Closing",
+    "description": "Join the beta",
+    "speakerNotes": ""
+  }
+]
