@@ -28,7 +28,7 @@ export default function Home() {
         </h1>
         
         <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl leading-relaxed">
-          The digital equivalent of a clean lab bench. Run code directly in your browser. No Docker wrestling, no dependency hell—just pure science.
+          Run code directly in your browser. No Docker wrestling, no dependency hell—just pure science.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
